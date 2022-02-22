@@ -1,0 +1,22 @@
+.article-view-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 2rem 0 0 0;
+}
+
+.article-view-article-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title-user-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.title-user-container > * {
+  margin: 0 0 2rem 0;
+}

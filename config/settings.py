@@ -46,10 +46,17 @@ INSTALLED_APPS = [
 
     # 3rd party
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_auth.registration',
 
     # local
+    'accounts.apps.AccountsConfig',
     'articles.apps.ArticlesConfig',
-    'frontend.apps.FrontendConfig'
+    'frontend.apps.FrontendConfig',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +161,7 @@ SITE_ID = 1
 # https://docs.djangoproject.com/en/3.0/ref/settings/#email-backend
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Substituding a custom User model
+
+AUTH_USER_MODEL = 'accounts.User'

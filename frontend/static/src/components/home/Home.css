@@ -1,0 +1,26 @@
+.article-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  list-style: none;
+  padding: 0px;
+}
+
+.article-container > div {
+  display: flex;
+}
+
+.article {
+  width: 20rem;
+  margin: 2rem 2rem 2rem 2rem;
+}
+
+.article-image {
+  width: 20rem;
+  height: 20rem;
+}
+
+.article:hover {
+  background-color: red;
+}
