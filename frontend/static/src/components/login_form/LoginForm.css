@@ -1,0 +1,29 @@
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+}
+
+.login-form-container {
+  display: flex;
+  align-items: center;
+  background-color: #d72c16;
+  border: 2rem solid #d72c16;
+  border-radius: 8px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  text-transform: uppercase;
+}
+
+.button-container {
+  display: flex;
+  width: 100%;
+}
+
+.button-container > button {
+  flex-grow: 1;
+}

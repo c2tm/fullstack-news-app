@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react"
 import './Home.css'
 import Article from './Article'
+import { useNavigate } from "react-router-dom"
 
-function Home({setState, setArticle}) {
+function Home({setArticle, articles, setArticles}) {
 
-    const [articles, setArticles] = useState(null)
+    const navigate = useNavigate();
 
     const handleArticleClick = (article) => {
         setArticle(article)
-        setState(2)
+        navigate(`/article/${article.id}`);
     }
 
     const handleErrors = (err) => {
@@ -16,16 +17,21 @@ function Home({setState, setArticle}) {
     }
 
     useEffect(() => {
-        const getArticles = async () => {
-            const response = await fetch('api/v1/articles/').catch(handleErrors);
-            if (!response.ok) {
-                throw new Error('Response was not ok!');
-            } else {
-                const data = await response.json();
-                setArticles(data);
+        if (!articles) {
+            const getArticles = async () => {
+                const response = await fetch('api/v1/articles/').catch(handleErrors);
+                if (!response.ok) {
+                    throw new Error('Response was not ok!');
+                } else {
+                    const data = await response.json();
+                    setArticles(data);
+                }
             }
+            getArticles()
         }
-        getArticles()
+        else {
+            return
+        }
     }, [])
 
     if (!articles) {
@@ -37,19 +43,19 @@ function Home({setState, setArticle}) {
     }
 
     const articleListHTML = articles.map(article => (
-        <Article username={article.username} title={article.title} user={article.user} src={article.img} handleArticleClick={handleArticleClick} article={article}/>
+        <Article username={article.authorname} title={article.title} user={article.user} src={article.img} handleArticleClick={handleArticleClick} article={article}/>
     ))
 
  
     return (
         <div>
-            <ul className="article-container">
-                <h1>All Articles</h1>
-                <div>
+            <div className="all-articles-container">
+                <h1>Featured Articles</h1>
+                <ul className="article-container">
                     {articleListHTML}
-                </div>
+                </ul>
                     
-            </ul> 
+            </div> 
         </div>
         )
     

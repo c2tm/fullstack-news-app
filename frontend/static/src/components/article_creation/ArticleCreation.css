@@ -1,0 +1,18 @@
+.author-article-list-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vw;
+}
+
+.author-article-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0px;
+}
+
+.article {
+  margin: 0 2rem 0 2rem;
+}

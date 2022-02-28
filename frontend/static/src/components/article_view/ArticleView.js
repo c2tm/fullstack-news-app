@@ -1,12 +1,102 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
+import Cookies from 'js-cookie'
+import { useParams, useNavigate } from 'react-router-dom';
 import './ArticleView.css'
 
-function ArticleView({article, userInfo}) {
+function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
 
     const [editState, setEditState] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
     const [imageState, setImageState] = useState(``);
-    const [titleState, setTitleState] = useState(article.title);
-    const [contentState, setContentState] = useState(article.content);
+    const [titleState, setTitleState] = useState('');
+    const [contentState, setContentState] = useState('');
+
+    const navigate = useNavigate()
+    let params = useParams();
+
+
+    useEffect(() => {
+        if(Cookies.get('authorization') && !article) {
+            const getArticle = async () => {
+                 const response = await fetch(`/api/v1/articles/creator/${params.articleId}/`).catch(handleErrors)
+                 if(!response) {
+                     throw new Error('Response was not ok!')
+                 } else {
+                     const data = await response.json()
+                     setArticle(data)
+                     setTitleState(data.title)
+                     setContentState(data.content)
+                     
+                 }
+            }
+            getArticle()
+        }
+        else {
+            return
+        }
+    },[])
+
+    useEffect(() => {
+        if(Cookies.get('authorization') && !article) {
+            const getArticle = async () => {
+                 const response = await fetch(`/api/v1/articles/creator/${params.articleId}/`).catch(handleErrors)
+                 if(!response) {
+                     throw new Error('Response was not ok!')
+                 } else {
+                     const data = await response.json()
+                     setArticle(data)
+                     setTitleState(data.title)
+                     setContentState(data.content)
+                     
+                 }
+            }
+            getArticle()
+        }
+        else {
+            return
+        }
+    },[])
+       
+    useEffect(() => {
+        if(!Cookies.get('authorization') && !article) {
+            const getArticle = async () => {
+                 const response = await fetch(`/api/v1/articles/${params.articleId}/`).catch(handleErrors);
+                 if(!response) {
+                     throw new Error('Response was not ok!');
+                 } else {
+                     const data = await response.json();
+                     setArticle(data);
+                     setTitleState(data.title);
+                     setContentState(data.content);
+                     
+                 }
+            }
+            getArticle();
+        }
+        else {
+            return 
+        }
+    },[])
+
+    useEffect(() => {
+        if(!userInfo && Cookies.get('authorization')) {
+            const getUser = async () => {
+                const response = await fetch('/rest-auth/user/').catch(handleErrors);
+
+                if(!response.ok) {
+                    throw new Error('Response was not ok!');
+                } else {
+                    const data = await response.json();
+                    setUserInfo(data);
+                }
+            }
+            getUser();
+        }
+        else {
+            return
+        }
+    }, [])
+
 
     const handleCancelClick = () => {
         setImageState('');
@@ -15,20 +105,102 @@ function ArticleView({article, userInfo}) {
         setEditState(false);
     }
 
-    const handleEditSubmit = () => {
-        let editedArticle = {}
-        if(imageState === ''){
-            editedArticle = {
-                title: titleState,
-                content: contentState,
+    const handleDelete = () => {
+        const deleteArticle = async() => {
+            const options = {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json',
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                }
             }
-        } else {
-            editedArticle = {
+            const response = await fetch(`/api/v1/articles/creator/${params.articleId}/`, options)
+
+            if(!response.ok) {
+                throw new Error('Response was not ok!')
+            }
+        } 
+        deleteArticle()
+        navigate(-1);
+    }
+
+    const handleEditSubmit = (e) => {
+        e.preventDefault();
+        if(imageState === ``) {
+            const articleInfo = {
+                author: userInfo.username,
+                content: contentState,
+                title: titleState,
+                phase: 'SB',
+            }
+            const submitArticle = async () => {
+                const options = {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-type': 'application/JSON',
+                        'X-CSRFToken': Cookies.get('csrftoken'),
+                    },
+                    body: JSON.stringify(articleInfo),
+                }
+                const response = await fetch(`/api/v1/articles/creator/${article.id}/`, options).catch(handleErrors);
+
+                if(!response.ok) {
+                    throw new Error('Response was not ok!');
+                } else {
+                    const editedArticle = {
+                        author: userInfo.username,
+                    content: contentState,
+                    img: article.img,
+                    title: titleState,
+                    phase: 'SB',
+                    }
+                    setArticle(editedArticle)
+                }
+            }
+            submitArticle();
+            setEditState(false);
+        }
+        else {
+            const articleInfo = {
+                author: userInfo.username,
+                content: contentState,
                 img: imageState,
                 title: titleState,
-                content: contentState,
+                phase: 'SB',
             }
+            const submitArticle = async () => {
+                const options = {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/JSON',
+                        'X-CSRFToken': Cookies.get('csrftoken'),
+                    },
+                    body: JSON.stringify(articleInfo),
+                }
+                const response = await fetch(`/creator/${article.id}`, options).catch(handleErrors);
+
+                if(!response.ok) {
+                    throw new Error('Response was not ok!')
+                } else {
+                    const editedArticle = {
+                        author: userInfo.username,
+                        content: contentState,
+                        img: imageState,
+                        title: titleState,
+                        phase: 'SB',
+                    }
+                    setArticle(editedArticle)
+                }
+            }
+            submitArticle()
+            setEditState(false);
         }
+    }
+
+    if(!article) {
+        return (
+            <h1>No Article Loaded...</h1>
+        )
     }
     
     const editHTML = (
@@ -53,10 +225,11 @@ function ArticleView({article, userInfo}) {
             <img src={article.img}/>
             <div className='title-user-container'>
                 <h1>{article.title}</h1>
-                <h2>{article.username}</h2>
+                <h2>{article.authorname}</h2>
             </div>
             <p>{article.content}</p>
-            {userInfo && (userInfo.username === article.username && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
+            {userInfo && ((userInfo.username === article.authorname && article.phase === 'DR') && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
+            {(article.phase === 'DR' || article.phase === 'RJ') && <button type='button' onClick={handleDelete}>Delete</button>}
         </div>
     )
 
