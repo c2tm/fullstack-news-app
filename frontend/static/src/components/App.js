@@ -6,8 +6,9 @@ import './App.css';
 import Home from './home/Home'
 import ArticleView from './article_view/ArticleView';
 import LoginForm from './login_form/LoginForm'
-import ArticleCreation from './article_creation/ArticleCreation';
+import ArticleCreation from './creator_view/CreatorView';
 import AdminView from './admin_view/AdminView';
+import CreateArticleView from './create_article_view/CreateArticleView';
 
 function App() {
 
@@ -71,7 +72,7 @@ function App() {
   )
 
   const createButtonHTML = (
-    <button type="button" onClick={() => navigate('creator/')}>Create Article</button>
+    <button type="button" onClick={() => navigate('creator/')}>Creator Dashboard</button>
   )
 
   const adminViewButton = (
@@ -81,7 +82,7 @@ function App() {
   const isSuperUser = () => auth ? auth.is_superuser ? true : false : false;
 
   return (
-    <div className="Appp">
+    <div className="App">
       <nav className='navbar'>
         <button onClick={() => navigate('/')}>Home</button>
         {auth ? logoutButtonHTML : loginButtonHTML}
@@ -94,6 +95,7 @@ function App() {
         <Route path="login/" element={<LoginForm setAuth={setAuth}/>}/>
         <Route path="creator/" element={<ArticleCreation setArticle={setArticle}/>}/>
         <Route path="admin/" element={<AdminView articles={articles} setArticles={setArticles} setArticle={setArticle} handleErrors={handleErrors} auth={auth} getUserInfo={getUserInfo} setAuth={setAuth}/>}/>
+        <Route path="create/" element={<CreateArticleView handleErrors={handleErrors} auth={auth}/>}/>
       </Routes>
     
     </div>

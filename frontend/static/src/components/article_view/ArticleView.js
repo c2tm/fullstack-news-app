@@ -197,6 +197,37 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
         }
     }
 
+    const handleSubmitForReview = () => {
+
+        console.log('iran')
+
+        const articleInfo = {
+            phase: 'SB',
+        }
+
+        const submitArticle = async () => {
+            const options = {
+                method: 'PATCH',
+                headers: {
+                    'Content-type': 'application/JSON',
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                },
+                body: JSON.stringify(articleInfo),
+            }
+            const response = await fetch(`/api/v1/articles/creator/${article.id}/`, options).catch(handleErrors);
+
+            if(!response.ok) {
+                throw new Error('Response was not ok!');
+            } else {
+                const copyArticle = article
+                article.phase = 'SB'
+                setArticle(copyArticle)
+            }
+        }
+        submitArticle();
+        navigate(-1);
+    }
+
     if(!article) {
         return (
             <h1>No Article Loaded...</h1>
@@ -228,8 +259,9 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
                 <h2>{article.authorname}</h2>
             </div>
             <p>{article.content}</p>
-            {userInfo && ((userInfo.username === article.authorname && article.phase === 'DR') && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
-            {(article.phase === 'DR' || article.phase === 'RJ') && <button type='button' onClick={handleDelete}>Delete</button>}
+            {userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft')) && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
+            {userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft')) && <button type='button' onClick={() => handleSubmitForReview()}>Submit for Review</button>)}
+            {(article.phase === 'DR' || article.phase === 'RJ' || article.phase === 'Draft' || article.phase === 'Rejected') && <button type='button' onClick={handleDelete}>Delete</button>}
         </div>
     )
 

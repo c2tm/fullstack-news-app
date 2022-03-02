@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Article from "../home/Article";
-
-import './ArticleCreation.css';
+import './CreatorView.css';
+import ArticleCV from "./ArticleCV";
 
 function ArticleCreation({setArticle}) {
 
@@ -30,6 +29,10 @@ function ArticleCreation({setArticle}) {
         navigate(`/article/${article.id}`);
     }
 
+    const handleCreateArticleClick = () => {
+        navigate('/create/');
+    }
+
     if(!authorArticles) {
         return (
             <div>
@@ -40,16 +43,20 @@ function ArticleCreation({setArticle}) {
     }
 
     const articleListHTML = authorArticles.map(article => (
-        <Article username={article.authorname} title={article.title} user={article.user} src={article.img} handleArticleClick={handleArticleClick} article={article}/>
+        <ArticleCV username={article.authorname} title={article.title} user={article.user} src={article.img} handleArticleClick={handleArticleClick} article={article}/>
     ))
 
     return (
-        <div className="author-article-list-container">
-            <h1>Your Articles</h1>
-            <ul className="author-article-list">
-                {articleListHTML}
-            </ul>
+        <div>
+            <button type="button" onClick={() => handleCreateArticleClick()}>+</button>
+             <div className="author-article-list-container">
+                <h1>Your Articles</h1>
+                <ul className="author-article-list">
+                    {articleListHTML}
+                </ul>
+            </div>
         </div>
+       
     )
 }
 
