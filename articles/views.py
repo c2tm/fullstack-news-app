@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 
-from . import serializersArticleSerializer
+from . import ArticleSerializer
 from .models import Article
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from articles.permissions import IsUserOrReadOnly, IsAdminOrReadOnly, UserPermsDetail, IsAdminOnly
