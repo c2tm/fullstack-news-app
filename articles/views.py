@@ -6,8 +6,6 @@ from .serializers import ArticleSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from articles.permissions import IsUserOrReadOnly, IsAdminOrReadOnly, UserPermsDetail, IsAdminOnly
 
-# Create your views here.
-
 
 class ArticleListApiView(generics.ListAPIView):
     queryset = Article.objects.filter(phase='PB')
