@@ -81,7 +81,7 @@ function App() {
   const isSuperUser = () => auth ? auth.is_superuser ? true : false : false;
 
   return (
-    <div className="App">
+    <div className="Appp">
       <nav className='navbar'>
         <button onClick={() => navigate('/')}>Home</button>
         {auth ? logoutButtonHTML : loginButtonHTML}
