@@ -5,17 +5,43 @@ import './ArticleView.css'
 
 function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
 
+    const [dropdownState, setDropdownState] = useState('');
     const [editState, setEditState] = useState(false);
     const [userInfo, setUserInfo] = useState(null);
     const [imageState, setImageState] = useState(``);
     const [titleState, setTitleState] = useState('');
     const [contentState, setContentState] = useState('');
+    const [adminToggle, setAdminToggle] = useState(false);
 
     const navigate = useNavigate()
     let params = useParams();
 
 
     useEffect(() => {
+        if(!userInfo && Cookies.get('authorization')) {
+            const getUser = async () => {
+                const response = await fetch('/rest-auth/user/').catch(handleErrors);
+
+                if(!response.ok) {
+                    throw new Error('Response was not ok!');
+                } else {
+                    const data = await response.json();
+                    setUserInfo(data);
+                    if (data.is_superuser) {
+                        setAdminToggle(true);
+                    }
+                }
+            }
+            getUser();
+            
+        }
+        else {
+            return
+        }
+    }, [])
+
+    useEffect(() => {
+
         if(Cookies.get('authorization') && !article) {
             const getArticle = async () => {
                  const response = await fetch(`/api/v1/articles/creator/${params.articleId}/`).catch(handleErrors)
@@ -25,7 +51,7 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
                      const data = await response.json()
                      setArticle(data)
                      setTitleState(data.title)
-                     setContentState(data.content)
+                     setContentState(data.content)  
                      
                  }
             }
@@ -36,26 +62,6 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
         }
     },[])
 
-    useEffect(() => {
-        if(Cookies.get('authorization') && !article) {
-            const getArticle = async () => {
-                 const response = await fetch(`/api/v1/articles/creator/${params.articleId}/`).catch(handleErrors)
-                 if(!response) {
-                     throw new Error('Response was not ok!')
-                 } else {
-                     const data = await response.json()
-                     setArticle(data)
-                     setTitleState(data.title)
-                     setContentState(data.content)
-                     
-                 }
-            }
-            getArticle()
-        }
-        else {
-            return
-        }
-    },[])
        
     useEffect(() => {
         if(!Cookies.get('authorization') && !article) {
@@ -79,23 +85,27 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
     },[])
 
     useEffect(() => {
-        if(!userInfo && Cookies.get('authorization')) {
-            const getUser = async () => {
-                const response = await fetch('/rest-auth/user/').catch(handleErrors);
+        
+        if(article) {
+            if(article.phase === 'DR' || article.phase === 'Draft') {
+                setDropdownState('Draft');
+           
+            } else if(article.phase === 'SB' || article.phase === 'Submitted') {
+                setDropdownState('Submitted');
 
-                if(!response.ok) {
-                    throw new Error('Response was not ok!');
-                } else {
-                    const data = await response.json();
-                    setUserInfo(data);
-                }
+            } else if(article.phase === 'RJ' || article.phase === 'Rejected') {
+                setDropdownState('Rejected');
+ 
+            } else if(article.phase === 'PB' || article.phase === 'Published') {
+                setDropdownState('Published');
+            
+            } else if(article.phase === 'AR' || article.phase === 'Archived') {
+                setDropdownState('Archived');
+
             }
-            getUser();
         }
-        else {
-            return
-        }
-    }, [])
+        
+    }, [article]);
 
 
     const handleCancelClick = () => {
@@ -107,6 +117,8 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
 
     const handleDelete = () => {
         const deleteArticle = async() => {
+            
+
             const options = {
                 method: 'DELETE',
                 headers: {
@@ -126,7 +138,9 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
 
     const handleEditSubmit = (e) => {
         e.preventDefault();
+
         if(imageState === ``) {
+
             const articleInfo = {
                 author: userInfo.username,
                 content: contentState,
@@ -177,7 +191,7 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
                     },
                     body: JSON.stringify(articleInfo),
                 }
-                const response = await fetch(`/creator/${article.id}`, options).catch(handleErrors);
+                const response = await fetch(`/api/v1/articles/creator/${article.id}/`, options).catch(handleErrors);
 
                 if(!response.ok) {
                     throw new Error('Response was not ok!')
@@ -199,8 +213,6 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
 
     const handleSubmitForReview = () => {
 
-        console.log('iran')
-
         const articleInfo = {
             phase: 'SB',
         }
@@ -219,13 +231,58 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
             if(!response.ok) {
                 throw new Error('Response was not ok!');
             } else {
-                const copyArticle = article
-                article.phase = 'SB'
-                setArticle(copyArticle)
+                const copyArticle = article;
+                copyArticle.phase = 'SB';
+                setArticle(copyArticle);
             }
         }
         submitArticle();
         navigate(-1);
+    }
+
+    const handlePhaseSubmit = (e) => {
+
+        e.preventDefault()
+
+        let newPhase;
+
+        if (dropdownState === 'Draft') {
+            newPhase = 'DR'
+        } else if (dropdownState === 'Submitted') {
+            newPhase = 'SB'
+        } else if (dropdownState === 'Rejected') {
+            newPhase = 'RJ'
+        } else if (dropdownState === 'Published') {
+            newPhase = 'PB'
+        } else if (dropdownState === 'Archived') {
+            newPhase = 'AR'
+        }
+
+        const articleInfo = {
+            phase: newPhase,
+        }
+
+        const changeArticlePhase = async () => {
+            const options = {
+                method: 'PATCH',
+                headers: {
+                    'Content-type': 'application/JSON',
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                },
+                body: JSON.stringify(articleInfo),
+            }
+            const response = await fetch(`/api/v1/articles/admin/${article.id}/`, options).catch(handleErrors);
+
+            if(!response.ok) {
+                throw new Error('Response was not ok!');
+            } else {
+                const copyArticle = article;
+                copyArticle.phase = newPhase;
+                setArticle(copyArticle);
+                alert('Phase Saved!');
+            }
+        }
+        changeArticlePhase();
     }
 
     if(!article) {
@@ -233,6 +290,8 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
             <h1>No Article Loaded...</h1>
         )
     }
+
+    console.log(article)
     
     const editHTML = (
         <div>
@@ -250,7 +309,8 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
             </form>
         </div>
     )
-
+    
+    
     const previewHTML = (
         <div className="article-view-article-container">
             <img src={article.img}/>
@@ -259,9 +319,23 @@ function ArticleView({article, setArticle, handleErrors, auth, setAuth}) {
                 <h2>{article.authorname}</h2>
             </div>
             <p>{article.content}</p>
-            {userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft')) && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
-            {userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft')) && <button type='button' onClick={() => handleSubmitForReview()}>Submit for Review</button>)}
-            {(article.phase === 'DR' || article.phase === 'RJ' || article.phase === 'Draft' || article.phase === 'Rejected') && <button type='button' onClick={handleDelete}>Delete</button>}
+
+            {((userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft'))) || (adminToggle)) && <button type='button' onClick={() => setEditState(true)}>Edit</button>)}
+            {((userInfo && ((userInfo.username === article.authorname && (article.phase === 'DR' || article.phase === 'Draft'))) || (adminToggle))  && <button type='button' onClick={() => handleSubmitForReview()}>Submit for Review</button>)}
+            {((article.phase === 'DR' || article.phase === 'RJ' || article.phase === 'Draft' || article.phase === 'Rejected') || (adminToggle)) && <button type='button' onClick={handleDelete}>Delete</button>}
+
+            {adminToggle && (
+                <form onSubmit={(e) => handlePhaseSubmit(e)}>
+                    <select id='phases-dropdown' value={dropdownState} onChange={(e) => setDropdownState(e.target.value)}>
+                        <option value='Draft'>Draft</option>
+                        <option value='Submitted'>Submitted</option>
+                        <option value='Rejected'>Rejected</option>
+                        <option value='Published'>Published</option>
+                        <option value='Archived'>Archived</option>
+                    </select>
+                    <button type='submit'>Save Phase</button>
+                </form> 
+            )}
         </div>
     )
 

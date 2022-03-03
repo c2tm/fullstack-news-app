@@ -2,7 +2,7 @@ import {useState} from 'react'
 import Cookies from "js-cookie"
 import { useNavigate } from 'react-router-dom';
 
-
+// authorArticles, setAuthorArticles
 function CreateArticleView(props) {
 
     const [imageState, setImageState] = useState('');
@@ -50,6 +50,9 @@ function CreateArticleView(props) {
 
             if(!response.ok) {
                 throw new Error('Response was not ok!')
+            } else {
+                const data = await response.json();
+                props.setAuthorArticles([...props.authorArticles, data]);
             }
         }
         createArticle();

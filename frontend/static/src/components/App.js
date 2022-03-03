@@ -6,7 +6,7 @@ import './App.css';
 import Home from './home/Home'
 import ArticleView from './article_view/ArticleView';
 import LoginForm from './login_form/LoginForm'
-import ArticleCreation from './creator_view/CreatorView';
+import CreatorView from './creator_view/CreatorView';
 import AdminView from './admin_view/AdminView';
 import CreateArticleView from './create_article_view/CreateArticleView';
 
@@ -15,6 +15,7 @@ function App() {
   const [auth, setAuth] = useState(false);
   const [articles, setArticles] = useState(null);
   const [article, setArticle] = useState(null);
+  const [authorArticles, setAuthorArticles] = useState(null);
   const navigate = useNavigate();
 
   const getUserInfo = useEffect(() => {
@@ -93,11 +94,11 @@ function App() {
         <Route path="/" element={<Home setArticle={setArticle} articles={articles} setArticles={setArticles}/>}/>
         <Route path="article/:articleId/" element={<ArticleView article={article} setArticle={setArticle} articles={articles} setArticles={setArticles} handleErrors={handleErrors} setAuth={setAuth} auth={auth}/>}/>
         <Route path="login/" element={<LoginForm setAuth={setAuth}/>}/>
-        <Route path="creator/" element={<ArticleCreation setArticle={setArticle}/>}/>
+        <Route path="creator/" element={<CreatorView setArticle={setArticle} setAuthorArticles={setAuthorArticles} authorArticles={authorArticles}/>}/>
         <Route path="admin/" element={<AdminView articles={articles} setArticles={setArticles} setArticle={setArticle} handleErrors={handleErrors} auth={auth} getUserInfo={getUserInfo} setAuth={setAuth}/>}/>
-        <Route path="create/" element={<CreateArticleView handleErrors={handleErrors} auth={auth}/>}/>
+        <Route path="create/" element={<CreateArticleView handleErrors={handleErrors} auth={auth} setAuthorArticles={setAuthorArticles} authorArticles={authorArticles}/>}/>
       </Routes>
-    
+      
     </div>
   );
 }

@@ -33,7 +33,9 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 class UserPermsDetail(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if obj.author == request.user:
+        if request.user.is_staff:
+            return True
+        elif obj.author == request.user:
             if obj.phase == 'DR':
                 return True
             elif obj.phase == 'RJ':

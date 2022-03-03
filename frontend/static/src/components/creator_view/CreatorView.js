@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import './CreatorView.css';
 import ArticleCV from "./ArticleCV";
 
-function ArticleCreation({setArticle}) {
+function CreatorView({setArticle, authorArticles, setAuthorArticles}) {
 
-    const [authorArticles, setAuthorArticles] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,4 +59,4 @@ function ArticleCreation({setArticle}) {
     )
 }
 
-export default ArticleCreation
+export default CreatorView
